@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Calendars</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --border: #e3e5e8;
+      --border-strong: #c8cbd0;
+      --text-primary: #1a1d23;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #378ADD;
+      --accent-light: #E6F1FB;
+      --accent-dark: #185FA5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111214;
+        --surface: #1c1e22;
+        --border: #2c2f35;
+        --border-strong: #3d4147;
+        --text-primary: #f0f1f3;
+        --text-secondary: #9ca3af;
+        --text-muted: #6b7280;
+        --accent: #5AA5F0;
+        --accent-light: #0c2a45;
+        --accent-dark: #85C4FF;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    .app { max-width: 860px; margin: 0 auto; }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 36px; }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ── Grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    /* ── Calendar card ── */
+    .cal-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .cal-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .cal-card .icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cal-card .icon svg { display: block; }
+
+    .cal-card .card-body { flex: 1; }
+
+    .cal-card .card-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .cal-card .card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .cal-card .card-arrow {
+      font-size: 16px;
+      color: var(--text-muted);
+      align-self: flex-end;
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .cal-card:hover .card-arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    /* colour variants for icons */
+    .icon.blue   { background: #dbeafe; }
+    .icon.green  { background: #d1fae5; }
+    .icon.purple { background: #ede9fe; }
+    .icon.amber  { background: #fef3c7; }
+    .icon.coral  { background: #fee2e2; }
+    .icon.teal   { background: #ccfbf1; }
+
+    @media (prefers-color-scheme: dark) {
+      .icon.blue   { background: #1e3a5f; }
+      .icon.green  { background: #14532d; }
+      .icon.purple { background: #2e1065; }
+      .icon.amber  { background: #451a03; }
+      .icon.coral  { background: #450a0a; }
+      .icon.teal   { background: #042f2e; }
+    }
+
+    /* ── Add card ── */
+    .add-card {
+      background: transparent;
+      border: 0.5px dashed var(--border-strong);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .add-card:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+    }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 16px;
+    }
+
+    .modal h2 { font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--text-primary); }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 0.5px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-primary);
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+
+    .btn:hover { background: var(--bg); }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+    /* ── Delete button on card ── */
+    .delete-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .cal-card:hover .delete-btn { display: flex; }
+    .delete-btn:hover { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="page-header">
+    <h1>My Calendars</h1>
+    <p>Click a calendar to open it. Add new ones using the + button.</p>
+  </div>
+
+  <div class="section-label">Saved Calendars</div>
+
+  <div class="cards-grid" id="cardsGrid">
+    <!-- Cards rendered by JS -->
+  </div>
+
+</div>
+
+<!-- Add Calendar Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Add Calendar</h2>
+    <div class="field">
+      <label>Calendar Name</label>
+      <input type="text" id="inputName" placeholder="e.g. Enthus M02" />
+    </div>
+    <div class="field">
+      <label>Page URL</label>
+      <input type="text" id="inputUrl" placeholder="e.g. trello-calendar.html or https://..." />
+    </div>
+    <div class="field">
+      <label>Description (optional)</label>
+      <input type="text" id="inputDesc" placeholder="e.g. April board" />
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <select id="inputColor">
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+        <option value="purple">Purple</option>
+        <option value="amber">Amber</option>
+        <option value="coral">Coral</option>
+        <option value="teal">Teal</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'my_calendars_v1';
+
+  const ICONS = {
+    blue:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#378ADD"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#378ADD" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#378ADD" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#378ADD" opacity="0.8"/></svg>`,
+    green:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#3B6D11"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.8"/></svg>`,
+    purple: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#534AB7"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#534AB7" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#534AB7" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#534AB7" opacity="0.8"/></svg>`,
+    amber:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#BA7517"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#BA7517" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#BA7517" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#BA7517" opacity="0.8"/></svg>`,
+    coral:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#D85A30"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#D85A30" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#D85A30" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#D85A30" opacity="0.8"/></svg>`,
+    teal:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#1D9E75"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.8"/></svg>`,
+  };
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function save(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function renderCards() {
+    const data = load();
+    const grid = document.getElementById('cardsGrid');
+    grid.innerHTML = '';
+
+    data.forEach((item, idx) => {
+      const card = document.createElement('a');
+      card.className = 'cal-card';
+      card.href = item.url;
+
+      card.innerHTML = `
+        <div class="icon ${item.color}">${ICONS[item.color] || ICONS.blue}</div>
+        <div class="card-body">
+          <div class="card-name">${item.name}</div>
+          <div class="card-desc">${item.desc || 'Trello Calendar View'}</div>
+        </div>
+        <div class="card-arrow">&#8594;</div>
+        <button class="delete-btn" title="Remove" data-idx="${idx}">&#10005;</button>
+      `;
+
+      card.querySelector('.delete-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const arr = load();
+        arr.splice(idx, 1);
+        save(arr);
+        renderCards();
+      });
+
+      grid.appendChild(card);
+    });
+
+    /* Add button */
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-card';
+    addBtn.innerHTML = `<span style="font-size:18px;line-height:1">+</span> Add Calendar`;
+    addBtn.addEventListener('click', () => openModal());
+    grid.appendChild(addBtn);
+  }
+
+  /* ── Modal ── */
+  function openModal() {
+    document.getElementById('inputName').value = '';
+    document.getElementById('inputUrl').value = '';
+    document.getElementById('inputDesc').value = '';
+    document.getElementById('inputColor').value = 'blue';
+    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('inputName').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const name  = document.getElementById('inputName').value.trim();
+    const url   = document.getElementById('inputUrl').value.trim();
+    const desc  = document.getElementById('inputDesc').value.trim();
+    const color = document.getElementById('inputColor').value;
+
+    if (!name || !url) {
+      document.getElementById('inputName').style.borderColor = !name ? '#E24B4A' : '';
+      document.getElementById('inputUrl').style.borderColor  = !url  ? '#E24B4A' : '';
+      return;
+    }
+
+    const arr = load();
+    arr.push({ name, url, desc, color });
+    save(arr);
+    closeModal();
+    renderCards();
+  });
+
+  /* ── Pre-seed "Enthus M01" ── */
+  (function seed() {
+    const existing = load();
+    const alreadyHas = existing.some(c => c.name === 'Enthus M01');
+    if (!alreadyHas) {
+      existing.unshift({
+        name: 'Enthus M01',
+        url: 'EnthuseM01.html',
+        desc: 'Trello Board Calendar',
+        color: 'blue'
+      });
+      save(existing);
+    }
+  })();
+
+  renderCards();
+</script>
+</body>
+</html>
