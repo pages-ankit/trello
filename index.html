@@ -46,10 +46,9 @@
     .app { max-width: 860px; margin: 0 auto; }
 
     .page-header { margin-bottom: 36px; display: flex; justify-content: space-between; align-items: flex-end; }
-    .page-header h1 { font-size: 28px; font-weight: 500; margin-bottom: 6px; }
-    .sync-indicator { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; }
-    .dot.active { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .page-header h1 { font-size: 28px; font-weight: 500; }
+    
+    .data-actions { display: flex; gap: 8px; }
 
     .section-label {
       font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
@@ -78,14 +77,9 @@
     }
     .cal-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    .icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .card-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .card-name { font-size: 16px; font-weight: 600; }
     .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-    .card-link { font-size: 11px; color: var(--accent); font-family: monospace; overflow: hidden; text-overflow: ellipsis; }
+    .card-link { font-size: 11px; color: var(--accent); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .delete-btn {
       position: absolute; top: 12px; right: 12px;
@@ -119,21 +113,14 @@
     }
     .field { margin-bottom: 16px; }
     .field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
-    .field input, .field select {
+    .field input {
       width: 100%; padding: 10px; border: 1px solid var(--border-strong);
       border-radius: 8px; background: var(--bg); color: inherit; outline: none;
     }
-    .field input:focus { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
 
-    .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-primary); }
+    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-primary); font-size: 13px; }
     .btn.primary { background: var(--accent); color: white; border: none; }
-
-    /* Colors */
-    .blue { background: #dbeafe; color: #1e40af; }
-    .green { background: #d1fae5; color: #065f46; }
-    .purple { background: #f3e8ff; color: #6b21a8; }
-    .amber { background: #fef3c7; color: #92400e; }
   </style>
 </head>
 <body>
@@ -142,14 +129,15 @@
   <div class="page-header">
     <div>
       <h1>My Boards</h1>
-      <div class="sync-indicator">
-        <div id="statusDot" class="dot"></div>
-        <span id="statusText">Connecting to GitHub...</span>
-      </div>
+    </div>
+    <div class="data-actions">
+      <button class="btn" onclick="exportData()">Download JSON</button>
+      <button class="btn" onclick="document.getElementById('fileInput').click()">Upload JSON</button>
+      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importData(event)">
     </div>
   </div>
 
-  <div class="section-label">Active Chapters</div>
+  <div class="section-label">Pinned Links</div>
   <div class="cards-grid" id="cardsGrid"></div>
 </div>
 
@@ -157,25 +145,16 @@
   <div class="modal">
     <h2 style="margin-bottom: 20px;">Add New Board</h2>
     <div class="field">
-      <label>Chapter / Board Name</label>
-      <input type="text" id="boardName" placeholder="e.g. Kinematics 1D">
+      <label>Chapter Name</label>
+      <input type="text" id="boardName" placeholder="e.g. Vectors">
     </div>
     <div class="field">
-      <label>GitHub Page Link (URL)</label>
-      <input type="text" id="boardUrl" placeholder="https://username.github.io/repo/">
+      <label>GitHub Page / HTML URL</label>
+      <input type="text" id="boardUrl" placeholder="https://...">
     </div>
     <div class="field">
-      <label>Description</label>
-      <input type="text" id="boardDesc" placeholder="Short summary">
-    </div>
-    <div class="field">
-      <label>Theme Color</label>
-      <select id="boardColor">
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-        <option value="purple">Purple</option>
-        <option value="amber">Amber</option>
-      </select>
+      <label>Description (Optional)</label>
+      <input type="text" id="boardDesc" placeholder="Summary of topics">
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -185,73 +164,8 @@
 </div>
 
 <script>
-  /** CONFIGURATION - FILL THIS IN **/
-  const GH_TOKEN = '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';
-  const GH_OWNER = 'pages-ankit';
-  const GH_REPO  = 'trello';
-  const GH_PATH  = 'calendar-menu-data.json'; // The file where boards are saved
-
-  let boards = [];
-
-  // API Helper
-  async function githubApi(method, body = null) {
-    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-    const headers = {
-      'Authorization': `token ${GH_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json'
-    };
-    
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : null
-    });
-    return response;
-  }
-
-  // Load Data
-  async function loadBoards() {
-    try {
-      const res = await githubApi('GET');
-      if (res.ok) {
-        const data = await res.json();
-        boards = JSON.parse(atob(data.content));
-        updateStatus(true, 'Synced with GitHub');
-      } else {
-        updateStatus(false, 'File not found. Creating new...');
-        boards = []; 
-      }
-    } catch (e) {
-      updateStatus(false, 'Offline / Error');
-    }
-    render();
-  }
-
-  // Save Data
-  async function saveBoards() {
-    updateStatus(false, 'Syncing...');
-    
-    // Get current SHA for update
-    const getRes = await githubApi('GET');
-    let sha = null;
-    if (getRes.ok) {
-      const currentFileData = await getRes.json();
-      sha = currentFileData.sha;
-    }
-
-    const body = {
-      message: 'Update dashboard boards',
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(boards, null, 2)))),
-      sha: sha
-    };
-
-    const res = await githubApi('PUT', body);
-    if (res.ok) {
-      updateStatus(true, 'Saved to GitHub');
-    } else {
-      alert('Error saving to GitHub. Check token/repo permissions.');
-    }
-  }
+  const STORAGE_KEY = 'manual_dashboard_v1';
+  let boards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
   function render() {
     const grid = document.getElementById('cardsGrid');
@@ -263,9 +177,8 @@
       card.href = b.url;
       card.target = '_blank';
       card.innerHTML = `
-        <div class="icon ${b.color}">◈</div>
         <div class="card-name">${b.name}</div>
-        <div class="card-desc">${b.desc || 'No description'}</div>
+        <div class="card-desc">${b.desc || ''}</div>
         <div class="card-link">${new URL(b.url).hostname}</div>
         <button class="delete-btn" onclick="removeBoard(event, ${i})">✕</button>
       `;
@@ -274,7 +187,7 @@
 
     const addBtn = document.createElement('div');
     addBtn.className = 'add-card';
-    addBtn.innerHTML = '+ Add Chapter Board';
+    addBtn.innerHTML = '+ Add Board';
     addBtn.onclick = () => document.getElementById('modalOverlay').classList.add('open');
     grid.appendChild(addBtn);
   }
@@ -283,35 +196,68 @@
     const name = document.getElementById('boardName').value;
     const url = document.getElementById('boardUrl').value;
     const desc = document.getElementById('boardDesc').value;
-    const color = document.getElementById('boardColor').value;
 
     if (!name || !url) return alert('Name and URL are required');
 
-    boards.push({ name, url, desc, color });
-    render();
+    boards.push({ name, url, desc });
+    saveAndRender();
     closeModal();
-    saveBoards();
+    // Clear inputs
+    document.getElementById('boardName').value = '';
+    document.getElementById('boardUrl').value = '';
+    document.getElementById('boardDesc').value = '';
   }
 
   function removeBoard(e, index) {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm('Remove this board?')) {
-      boards.splice(index, 1);
-      render();
-      saveBoards();
-    }
+    boards.splice(index, 1);
+    saveAndRender();
+  }
+
+  function saveAndRender() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(boards));
+    render();
+  }
+
+  // DATA MANAGEMENT
+  function exportData() {
+    const dataStr = JSON.stringify(boards, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (Array.isArray(imported)) {
+          boards = imported;
+          saveAndRender();
+          alert('Data imported successfully!');
+        } else {
+          alert('Invalid file format.');
+        }
+      } catch (err) {
+        alert('Error reading JSON file.');
+      }
+    };
+    reader.readAsText(file);
   }
 
   function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
   
-  function updateStatus(active, text) {
-    document.getElementById('statusDot').className = 'dot' + (active ? ' active' : '');
-    document.getElementById('statusText').innerText = text;
-  }
-
-  // Start
-  loadBoards();
+  render();
 </script>
 </body>
 </html>
