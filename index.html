@@ -48,7 +48,7 @@
     .page-header { margin-bottom: 36px; display: flex; justify-content: space-between; align-items: flex-end; }
     .page-header h1 { font-size: 28px; font-weight: 500; }
     
-    .data-actions { display: flex; gap: 8px; }
+    .data-actions { display: flex; gap: 10px; }
 
     .section-label {
       font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
@@ -72,54 +72,77 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       position: relative;
     }
     .cal-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    .card-name { font-size: 16px; font-weight: 600; }
+    .cal-card .icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    .card-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
     .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-    .card-link { font-size: 11px; color: var(--accent); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-link { font-size: 10px; color: var(--text-muted); font-family: monospace; overflow: hidden; text-overflow: ellipsis; }
 
     .delete-btn {
-      position: absolute; top: 12px; right: 12px;
-      width: 24px; height: 24px; border-radius: 6px;
-      border: none; background: transparent;
-      color: var(--text-muted); cursor: pointer;
-      display: none; align-items: center; justify-content: center;
+      position: absolute; top: 10px; right: 10px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: transparent; border: none;
+      color: var(--text-muted); font-size: 14px;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
     }
     .cal-card:hover .delete-btn { display: flex; }
-    .delete-btn:hover { background: #fee2e2; color: #ef4444; }
+    .delete-btn:hover { background: #fee2e2; color: #b91c1c; }
 
     .add-card {
-      border: 1.5px dashed var(--border-strong);
+      border: 1px dashed var(--border-strong);
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; color: var(--text-muted); font-weight: 500;
-      min-height: 140px; transition: all 0.2s;
+      min-height: 140px; transition: all 0.15s;
     }
     .add-card:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* Color Variants */
+    .icon.blue   { background: #dbeafe; }
+    .icon.green  { background: #d1fae5; }
+    .icon.purple { background: #ede9fe; }
+    .icon.amber  { background: #fef3c7; }
+    .icon.coral  { background: #fee2e2; }
+    .icon.teal   { background: #ccfbf1; }
+
+    @media (prefers-color-scheme: dark) {
+      .icon.blue   { background: #1e3a5f; }
+      .icon.green  { background: #14532d; }
+      .icon.purple { background: #2e1065; }
+      .icon.amber  { background: #451a03; }
+      .icon.coral  { background: #450a0a; }
+      .icon.teal   { background: #042f2e; }
+    }
 
     /* Modal */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4); z-index: 100;
-      align-items: center; justify-content: center; backdrop-filter: blur(2px);
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: var(--surface); padding: 32px;
-      border-radius: 16px; width: 100%; max-width: 420px;
+      background: var(--surface); padding: 28px;
+      border-radius: 14px; width: 100%; max-width: 440px;
     }
     .field { margin-bottom: 16px; }
     .field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
-    .field input {
-      width: 100%; padding: 10px; border: 1px solid var(--border-strong);
-      border-radius: 8px; background: var(--bg); color: inherit; outline: none;
+    .field input, .field select {
+      width: 100%; padding: 10px; border: 0.5px solid var(--border-strong);
+      border-radius: 8px; background: var(--bg); color: inherit; outline: none; font-size: 14px;
     }
-    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+    .field-row { display: flex; gap: 12px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
-    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-primary); font-size: 13px; }
+    .btn { padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--surface); color: var(--text-primary); font-size: 13px; }
     .btn.primary { background: var(--accent); color: white; border: none; }
   </style>
 </head>
@@ -127,34 +150,45 @@
 
 <div class="app">
   <div class="page-header">
-    <div>
-      <h1>My Boards</h1>
-    </div>
+    <h1>My Boards</h1>
     <div class="data-actions">
-      <button class="btn" onclick="exportData()">Download JSON</button>
-      <button class="btn" onclick="document.getElementById('fileInput').click()">Upload JSON</button>
+      <button class="btn" onclick="exportData()">Export JSON</button>
+      <button class="btn" onclick="document.getElementById('fileInput').click()">Import JSON</button>
       <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importData(event)">
     </div>
   </div>
 
-  <div class="section-label">Pinned Links</div>
+  <div class="section-label">Study Chapters</div>
   <div class="cards-grid" id="cardsGrid"></div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h2 style="margin-bottom: 20px;">Add New Board</h2>
+    <h2 style="margin-bottom: 16px; font-size: 18px;">Add New Board</h2>
     <div class="field">
-      <label>Chapter Name</label>
-      <input type="text" id="boardName" placeholder="e.g. Vectors">
+      <label>Board Name</label>
+      <input type="text" id="boardName" placeholder="e.g. Kinematics 1D">
     </div>
     <div class="field">
-      <label>GitHub Page / HTML URL</label>
+      <label>URL / GitHub Link</label>
       <input type="text" id="boardUrl" placeholder="https://...">
     </div>
-    <div class="field">
-      <label>Description (Optional)</label>
-      <input type="text" id="boardDesc" placeholder="Summary of topics">
+    <div class="field-row">
+      <div class="field" style="flex:2">
+        <label>Description</label>
+        <input type="text" id="boardDesc" placeholder="e.g. Notes & Problems">
+      </div>
+      <div class="field" style="flex:1">
+        <label>Color</label>
+        <select id="boardColor">
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="purple">Purple</option>
+          <option value="amber">Amber</option>
+          <option value="coral">Coral</option>
+          <option value="teal">Teal</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -164,7 +198,17 @@
 </div>
 
 <script>
-  const STORAGE_KEY = 'manual_dashboard_v1';
+  const STORAGE_KEY = 'dashboard_manual_sync_v2';
+  
+  const ICONS = {
+    blue:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#378ADD"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#378ADD" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#378ADD" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#378ADD" opacity="0.8"/></svg>`,
+    green:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#3B6D11"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.8"/></svg>`,
+    purple: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#534AB7"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#534AB7" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#534AB7" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#534AB7" opacity="0.8"/></svg>`,
+    amber:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#BA7517"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#BA7517" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#BA7517" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#BA7517" opacity="0.8"/></svg>`,
+    coral:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#D85A30"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#D85A30" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#D85A30" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#D85A30" opacity="0.8"/></svg>`,
+    teal:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#1D9E75"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.8"/></svg>`,
+  };
+
   let boards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
   function render() {
@@ -177,6 +221,7 @@
       card.href = b.url;
       card.target = '_blank';
       card.innerHTML = `
+        <div class="icon ${b.color}">${ICONS[b.color] || ICONS.blue}</div>
         <div class="card-name">${b.name}</div>
         <div class="card-desc">${b.desc || ''}</div>
         <div class="card-link">${new URL(b.url).hostname}</div>
@@ -193,19 +238,17 @@
   }
 
   function addBoard() {
-    const name = document.getElementById('boardName').value;
-    const url = document.getElementById('boardUrl').value;
-    const desc = document.getElementById('boardDesc').value;
+    const name = document.getElementById('boardName').value.trim();
+    const url = document.getElementById('boardUrl').value.trim();
+    const desc = document.getElementById('boardDesc').value.trim();
+    const color = document.getElementById('boardColor').value;
 
-    if (!name || !url) return alert('Name and URL are required');
+    if (!name || !url) return;
 
-    boards.push({ name, url, desc });
+    boards.push({ name, url, desc, color });
     saveAndRender();
     closeModal();
-    // Clear inputs
-    document.getElementById('boardName').value = '';
-    document.getElementById('boardUrl').value = '';
-    document.getElementById('boardDesc').value = '';
+    ['boardName', 'boardUrl', 'boardDesc'].forEach(id => document.getElementById(id).value = '');
   }
 
   function removeBoard(e, index) {
@@ -220,37 +263,28 @@
     render();
   }
 
-  // DATA MANAGEMENT
   function exportData() {
-    const dataStr = JSON.stringify(boards, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(boards, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'data.json';
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dashboard_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
     URL.revokeObjectURL(url);
   }
 
-  function importData(event) {
-    const file = event.target.files[0];
+  function importData(e) {
+    const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (event) => {
       try {
-        const imported = JSON.parse(e.target.result);
+        const imported = JSON.parse(event.target.result);
         if (Array.isArray(imported)) {
           boards = imported;
           saveAndRender();
-          alert('Data imported successfully!');
-        } else {
-          alert('Invalid file format.');
         }
-      } catch (err) {
-        alert('Error reading JSON file.');
-      }
+      } catch (err) { alert('Invalid JSON file.'); }
     };
     reader.readAsText(file);
   }
