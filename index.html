@@ -8,153 +8,89 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f6f7f9;
-      --surface: #ffffff;
-      --border: #e3e5e8;
-      --border-strong: #c8cbd0;
-      --text-primary: #1a1d23;
-      --text-secondary: #6b7280;
-      --text-muted: #9ca3af;
-      --accent: #378ADD;
-      --accent-light: #E6F1FB;
-      --accent-dark: #185FA5;
+      --bg: #f6f7f9; --surface: #ffffff; --border: #e3e5e8; --border-strong: #c8cbd0;
+      --text-primary: #1a1d23; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --accent: #378ADD; --accent-light: #E6F1FB; --accent-dark: #185FA5;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111214;
-        --surface: #1c1e22;
-        --border: #2c2f35;
-        --border-strong: #3d4147;
-        --text-primary: #f0f1f3;
-        --text-secondary: #9ca3af;
-        --text-muted: #6b7280;
-        --accent: #5AA5F0;
-        --accent-light: #0c2a45;
-        --accent-dark: #85C4FF;
+        --bg: #111214; --surface: #1c1e22; --border: #2c2f35; --border-strong: #3d4147;
+        --text-primary: #f0f1f3; --text-secondary: #9ca3af; --text-muted: #6b7280;
+        --accent: #5AA5F0; --accent-light: #0c2a45; --accent-dark: #85C4FF;
       }
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding: 40px 24px;
-    }
-
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text-primary); padding: 40px 24px; min-height: 100vh; }
     .app { max-width: 860px; margin: 0 auto; }
 
     .page-header { margin-bottom: 36px; display: flex; justify-content: space-between; align-items: flex-end; }
-    .page-header h1 { font-size: 28px; font-weight: 500; }
-    
-    .data-actions { display: flex; gap: 10px; }
+    .status-bar { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; }
+    .dot.online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
 
-    .section-label {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
-      color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;
-    }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 40px;
-    }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 40px; }
 
     .cal-card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: all 0.15s ease;
-      position: relative;
+      background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px;
+      padding: 20px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 12px;
+      transition: all 0.2s ease; position: relative;
     }
     .cal-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    .cal-card .icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+    .cal-card .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     .card-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
     .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-    .card-link { font-size: 10px; color: var(--text-muted); font-family: monospace; overflow: hidden; text-overflow: ellipsis; }
+    .card-link { font-size: 10px; color: var(--text-muted); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .delete-btn {
-      position: absolute; top: 10px; right: 10px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: transparent; border: none;
-      color: var(--text-muted); font-size: 14px;
-      cursor: pointer; display: none; align-items: center; justify-content: center;
+      position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%;
+      border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: none; align-items: center; justify-content: center;
     }
     .cal-card:hover .delete-btn { display: flex; }
-    .delete-btn:hover { background: #fee2e2; color: #b91c1c; }
+    .delete-btn:hover { background: #fee2e2; color: #ef4444; }
 
     .add-card {
-      border: 1px dashed var(--border-strong);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text-muted); font-weight: 500;
-      min-height: 140px; transition: all 0.15s;
+      border: 1.5px dashed var(--border-strong); border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted); font-weight: 500; min-height: 140px; transition: 0.2s;
     }
     .add-card:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
     /* Color Variants */
-    .icon.blue   { background: #dbeafe; }
-    .icon.green  { background: #d1fae5; }
-    .icon.purple { background: #ede9fe; }
-    .icon.amber  { background: #fef3c7; }
-    .icon.coral  { background: #fee2e2; }
-    .icon.teal   { background: #ccfbf1; }
+    .icon.blue   { background: #dbeafe; } .icon.green  { background: #d1fae5; }
+    .icon.purple { background: #ede9fe; } .icon.amber  { background: #fef3c7; }
+    .icon.coral  { background: #fee2e2; } .icon.teal   { background: #ccfbf1; }
 
     @media (prefers-color-scheme: dark) {
-      .icon.blue   { background: #1e3a5f; }
-      .icon.green  { background: #14532d; }
-      .icon.purple { background: #2e1065; }
-      .icon.amber  { background: #451a03; }
-      .icon.coral  { background: #450a0a; }
-      .icon.teal   { background: #042f2e; }
+      .icon.blue   { background: #1e3a5f; } .icon.green  { background: #14532d; }
+      .icon.purple { background: #2e1065; } .icon.amber  { background: #451a03; }
+      .icon.coral  { background: #450a0a; } .icon.teal   { background: #042f2e; }
     }
 
-    /* Modal */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45); z-index: 100;
-      align-items: center; justify-content: center;
-    }
+    .btn { padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-primary); font-size: 13px; }
+    .btn.primary { background: var(--accent); color: white; border: none; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface); padding: 28px;
-      border-radius: 14px; width: 100%; max-width: 440px;
-    }
+    .modal { background: var(--surface); padding: 32px; border-radius: 16px; width: 420px; }
     .field { margin-bottom: 16px; }
     .field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
-    .field input, .field select {
-      width: 100%; padding: 10px; border: 0.5px solid var(--border-strong);
-      border-radius: 8px; background: var(--bg); color: inherit; outline: none; font-size: 14px;
-    }
-    .field-row { display: flex; gap: 12px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-
-    .btn { padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--surface); color: var(--text-primary); font-size: 13px; }
-    .btn.primary { background: var(--accent); color: white; border: none; }
+    .field input, .field select { width: 100%; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg); color: inherit; outline: none; }
   </style>
 </head>
 <body>
 
 <div class="app">
   <div class="page-header">
-    <h1>My Boards</h1>
-    <div class="data-actions">
-      <button class="btn" onclick="exportData()">Export JSON</button>
-      <button class="btn" onclick="document.getElementById('fileInput').click()">Import JSON</button>
-      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importData(event)">
+    <div>
+      <h1>My Boards</h1>
+      <div class="status-bar"><div id="statusDot" class="dot"></div> <span id="statusText">Local Storage Mode</span></div>
+    </div>
+    <div style="display:flex; gap:10px">
+      <button class="btn" onclick="fetchFromGithub()">Pull from GitHub</button>
+      <button class="btn primary" onclick="exportData()">Export JSON</button>
     </div>
   </div>
 
@@ -164,42 +100,39 @@
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h2 style="margin-bottom: 16px; font-size: 18px;">Add New Board</h2>
+    <h2 style="margin-bottom: 20px; font-size: 18px;">Add New Chapter</h2>
+    <div class="field"><label>Chapter Name</label><input type="text" id="boardName" placeholder="e.g. Rotational Motion"></div>
+    <div class="field"><label>GitHub / HTML URL</label><input type="text" id="boardUrl" placeholder="https://..."></div>
+    <div class="field"><label>Description</label><input type="text" id="boardDesc" placeholder="Brief summary"></div>
     <div class="field">
-      <label>Board Name</label>
-      <input type="text" id="boardName" placeholder="e.g. Kinematics 1D">
+      <label>Card Color</label>
+      <select id="boardColor">
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+        <option value="purple">Purple</option>
+        <option value="amber">Amber</option>
+        <option value="coral">Coral</option>
+        <option value="teal">Teal</option>
+      </select>
     </div>
-    <div class="field">
-      <label>URL / GitHub Link</label>
-      <input type="text" id="boardUrl" placeholder="https://...">
-    </div>
-    <div class="field-row">
-      <div class="field" style="flex:2">
-        <label>Description</label>
-        <input type="text" id="boardDesc" placeholder="e.g. Notes & Problems">
-      </div>
-      <div class="field" style="flex:1">
-        <label>Color</label>
-        <select id="boardColor">
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
-          <option value="purple">Purple</option>
-          <option value="amber">Amber</option>
-          <option value="coral">Coral</option>
-          <option value="teal">Teal</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px">
       <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn primary" onclick="addBoard()">Save Board</button>
+      <button class="btn primary" onclick="addBoard()">Save Chapter</button>
     </div>
   </div>
 </div>
 
 <script>
-  const STORAGE_KEY = 'dashboard_manual_sync_v2';
-  
+  // --- CONFIGURATION ---
+  const GH_CONFIG = {
+    owner: 'pages-ankit',
+    repo: 'trello',
+    branch: 'main',
+    path: 'calendar-data.json'
+  };
+
+  const STORAGE_KEY = 'dashboard_manual_sync_v4';
+
   const ICONS = {
     blue:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#378ADD"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#378ADD" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#378ADD" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#378ADD" opacity="0.8"/></svg>`,
     green:  `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#3B6D11"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#3B6D11" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#3B6D11" opacity="0.8"/></svg>`,
@@ -211,30 +144,43 @@
 
   let boards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
+  async function fetchFromGithub() {
+    const url = `https://raw.githubusercontent.com/${GH_CONFIG.owner}/${GH_CONFIG.repo}/${GH_CONFIG.branch}/${GH_CONFIG.path}?t=${Date.now()}`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          boards = data;
+          saveLocal();
+          updateStatus(true, 'Synced from GitHub');
+        }
+      } else { updateStatus(false, 'GitHub file not found'); }
+    } catch (e) { updateStatus(false, 'Fetch Error (Check CORS/Repo)'); }
+  }
+
   function render() {
     const grid = document.getElementById('cardsGrid');
     grid.innerHTML = '';
-
     boards.forEach((b, i) => {
-      const card = document.createElement('a');
-      card.className = 'cal-card';
-      card.href = b.url;
-      card.target = '_blank';
-      card.innerHTML = `
+      const el = document.createElement('a');
+      el.className = 'cal-card';
+      el.href = b.url;
+      el.target = '_blank';
+      el.innerHTML = `
         <div class="icon ${b.color}">${ICONS[b.color] || ICONS.blue}</div>
         <div class="card-name">${b.name}</div>
         <div class="card-desc">${b.desc || ''}</div>
         <div class="card-link">${new URL(b.url).hostname}</div>
-        <button class="delete-btn" onclick="removeBoard(event, ${i})">✕</button>
+        <button class="delete-btn" onclick="removeBoard(event, ${i})" title="Remove">✕</button>
       `;
-      grid.appendChild(card);
+      grid.appendChild(el);
     });
-
-    const addBtn = document.createElement('div');
-    addBtn.className = 'add-card';
-    addBtn.innerHTML = '+ Add Board';
-    addBtn.onclick = () => document.getElementById('modalOverlay').classList.add('open');
-    grid.appendChild(addBtn);
+    const add = document.createElement('div');
+    add.className = 'add-card';
+    add.innerHTML = '<span style="font-size:20px;margin-right:8px">+</span> Add Board';
+    add.onclick = () => document.getElementById('modalOverlay').classList.add('open');
+    grid.appendChild(add);
   }
 
   function addBoard() {
@@ -242,23 +188,22 @@
     const url = document.getElementById('boardUrl').value.trim();
     const desc = document.getElementById('boardDesc').value.trim();
     const color = document.getElementById('boardColor').value;
-
-    if (!name || !url) return;
-
+    if(!name || !url) return;
     boards.push({ name, url, desc, color });
-    saveAndRender();
+    saveLocal();
     closeModal();
     ['boardName', 'boardUrl', 'boardDesc'].forEach(id => document.getElementById(id).value = '');
   }
 
-  function removeBoard(e, index) {
-    e.preventDefault();
-    e.stopPropagation();
-    boards.splice(index, 1);
-    saveAndRender();
+  function removeBoard(e, i) {
+    e.preventDefault(); e.stopPropagation();
+    if(confirm('Delete this chapter?')) {
+      boards.splice(i, 1);
+      saveLocal();
+    }
   }
 
-  function saveAndRender() {
+  function saveLocal() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(boards));
     render();
   }
@@ -268,30 +213,20 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dashboard_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = GH_CONFIG.path;
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  function importData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const imported = JSON.parse(event.target.result);
-        if (Array.isArray(imported)) {
-          boards = imported;
-          saveAndRender();
-        }
-      } catch (err) { alert('Invalid JSON file.'); }
-    };
-    reader.readAsText(file);
+    alert("Export successful! Now upload this 'data.json' to your GitHub repo.");
   }
 
   function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-  
+  function updateStatus(on, text) {
+    document.getElementById('statusDot').className = 'dot' + (on ? ' online' : '');
+    document.getElementById('statusText').innerText = text;
+  }
+
   render();
+  if (GH_CONFIG.owner !== 'YOUR_USERNAME') fetchFromGithub();
 </script>
 </body>
 </html>
