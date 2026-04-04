@@ -45,32 +45,15 @@
 
     .app { max-width: 860px; margin: 0 auto; }
 
-    /* ── Page header ── */
     .page-header { margin-bottom: 36px; }
+    .page-header h1 { font-size: 28px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+    .page-header p  { font-size: 14px; color: var(--text-secondary); }
 
-    .page-header h1 {
-      font-size: 28px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-
-    .page-header p {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    /* ── Section label ── */
     .section-label {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 12px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;
     }
 
-    /* ── Grid ── */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -78,7 +61,6 @@
       margin-bottom: 40px;
     }
 
-    /* ── Calendar card ── */
     .cal-card {
       background: var(--surface);
       border: 0.5px solid var(--border);
@@ -93,49 +75,30 @@
       cursor: pointer;
       position: relative;
     }
-
-    .cal-card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-light);
-    }
+    .cal-card:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
 
     .cal-card .icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-
-    .cal-card .icon svg { display: block; }
 
     .cal-card .card-body { flex: 1; }
+    .cal-card .card-name { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+    .cal-card .card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 
-    .cal-card .card-name {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-
-    .cal-card .card-desc {
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.5;
+    .cal-card .card-meta {
+      font-size: 10px; color: var(--text-muted);
+      font-family: monospace; margin-top: 4px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
     .cal-card .card-arrow {
-      font-size: 16px;
-      color: var(--text-muted);
-      align-self: flex-end;
+      font-size: 16px; color: var(--text-muted); align-self: flex-end;
       transition: color 0.15s, transform 0.15s;
     }
+    .cal-card:hover .card-arrow { color: var(--accent); transform: translateX(3px); }
 
-    .cal-card:hover .card-arrow {
-      color: var(--accent);
-      transform: translateX(3px);
-    }
-
-    /* colour variants for icons */
+    /* color variants */
     .icon.blue   { background: #dbeafe; }
     .icon.green  { background: #d1fae5; }
     .icon.purple { background: #ede9fe; }
@@ -152,128 +115,95 @@
       .icon.teal   { background: #042f2e; }
     }
 
-    /* ── Add card ── */
     .add-card {
       background: transparent;
       border: 0.5px dashed var(--border-strong);
       border-radius: 12px;
       padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
-      font-size: 13px;
-      color: var(--text-muted);
+      font-size: 13px; color: var(--text-muted);
     }
+    .add-card:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent-dark); }
 
-    .add-card:hover {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      color: var(--accent-dark);
+    /* delete button */
+    .delete-btn {
+      position: absolute; top: 10px; right: 10px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: transparent; border: none;
+      color: var(--text-muted); font-size: 14px;
+      cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      line-height: 1; transition: background 0.15s, color 0.15s;
     }
+    .cal-card:hover .delete-btn { display: flex; }
+    .delete-btn:hover { background: #fee2e2; color: #b91c1c; }
 
-    /* ── Modal overlay ── */
+    /* ── Modal ── */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
     }
-
     .modal-overlay.open { display: flex; }
 
     .modal {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      width: 100%;
-      max-width: 420px;
-      margin: 0 16px;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 14px; padding: 28px;
+      width: 100%; max-width: 460px; margin: 0 16px;
     }
-
-    .modal h2 { font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--text-primary); }
+    .modal h2 { font-size: 18px; font-weight: 500; margin-bottom: 6px; color: var(--text-primary); }
+    .modal .modal-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 22px; line-height: 1.5; }
 
     .field { margin-bottom: 16px; }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
+    .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
     .field input, .field select {
-      width: 100%;
-      padding: 9px 12px;
+      width: 100%; padding: 9px 12px;
       border: 0.5px solid var(--border-strong);
-      border-radius: 8px;
-      background: var(--bg);
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s;
-      font-family: inherit;
+      border-radius: 8px; background: var(--bg);
+      color: var(--text-primary); font-size: 14px;
+      outline: none; transition: border-color 0.15s; font-family: inherit;
     }
-
     .field input:focus, .field select:focus { border-color: var(--accent); }
 
+    .field .hint {
+      font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.5;
+    }
+    .field .hint code {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: 4px; padding: 1px 5px; font-size: 11px;
+    }
+
+    .field-row { display: flex; gap: 12px; }
+    .field-row .field { flex: 1; }
+
     .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 24px;
+      display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;
     }
 
     .btn {
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 0.5px solid var(--border-strong);
-      background: var(--surface);
-      color: var(--text-primary);
-      transition: background 0.15s;
-      font-family: inherit;
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 0.5px solid var(--border-strong);
+      background: var(--surface); color: var(--text-primary);
+      transition: background 0.15s; font-family: inherit;
     }
-
     .btn:hover { background: var(--bg); }
-
-    .btn.primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
 
-    /* ── Delete button on card ── */
-    .delete-btn {
-      position: absolute;
-      top: 10px; right: 10px;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 14px;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      transition: background 0.15s, color 0.15s;
-    }
+    /* validation error */
+    .field input.err { border-color: #E24B4A !important; }
 
-    .cal-card:hover .delete-btn { display: flex; }
-    .delete-btn:hover { background: #fee2e2; color: #b91c1c; }
+    /* preview url strip */
+    #urlPreview {
+      font-size: 11px; color: var(--text-muted);
+      margin-top: 18px; padding: 10px 12px;
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: 8px; word-break: break-all; line-height: 1.6;
+      display: none;
+    }
+    #urlPreview span { color: var(--accent); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -281,44 +211,53 @@
 
   <div class="page-header">
     <h1>My Calendars</h1>
-    <p>Click a calendar to open it. Add new ones using the + button.</p>
+    <p>Click a calendar to open it. Add new boards using the + button — no extra files needed.</p>
   </div>
 
   <div class="section-label">Saved Calendars</div>
-
-  <div class="cards-grid" id="cardsGrid">
-    <!-- Cards rendered by JS -->
-  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
 
 </div>
 
-<!-- Add Calendar Modal -->
+<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2>Add Calendar</h2>
+    <p class="modal-sub">Enter your Trello board details. The calendar page is shared — each board gets its own link via a URL parameter.</p>
+
     <div class="field">
       <label>Calendar Name</label>
       <input type="text" id="inputName" placeholder="e.g. Enthus M02" />
     </div>
+
     <div class="field">
-      <label>Page URL</label>
-      <input type="text" id="inputUrl" placeholder="e.g. trello-calendar.html or https://..." />
+      <label>Board ID</label>
+      <input type="text" id="inputBoardId" placeholder="e.g. 695c638857e213eb5b8b251b" />
+      <div class="hint">
+        Find it: open your board → add <code>.json</code> to the URL → copy the <code>"id"</code> field at the top.
+      </div>
     </div>
-    <div class="field">
-      <label>Description (optional)</label>
-      <input type="text" id="inputDesc" placeholder="e.g. April board" />
+
+    <div class="field-row">
+      <div class="field">
+        <label>Description (optional)</label>
+        <input type="text" id="inputDesc" placeholder="e.g. April sprint" />
+      </div>
+      <div class="field" style="max-width:130px">
+        <label>Color</label>
+        <select id="inputColor">
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="purple">Purple</option>
+          <option value="amber">Amber</option>
+          <option value="coral">Coral</option>
+          <option value="teal">Teal</option>
+        </select>
+      </div>
     </div>
-    <div class="field">
-      <label>Color</label>
-      <select id="inputColor">
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-        <option value="purple">Purple</option>
-        <option value="amber">Amber</option>
-        <option value="coral">Coral</option>
-        <option value="teal">Teal</option>
-      </select>
-    </div>
+
+    <div id="urlPreview"></div>
+
     <div class="modal-actions">
       <button class="btn" id="cancelBtn">Cancel</button>
       <button class="btn primary" id="saveBtn">Save</button>
@@ -327,7 +266,8 @@
 </div>
 
 <script>
-  const STORAGE_KEY = 'my_calendars_v1';
+  const STORAGE_KEY    = 'my_calendars_v2';
+  const CALENDAR_FILE  = 'trello-calendar.html'; // single shared calendar page
 
   const ICONS = {
     blue:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#378ADD"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#378ADD" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#378ADD" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#378ADD" opacity="0.8"/></svg>`,
@@ -338,102 +278,113 @@
     teal:   `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="10" rx="2" fill="#1D9E75"/><rect x="12" y="2" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="12" y="10" width="8" height="10" rx="2" fill="#1D9E75" opacity="0.6"/><rect x="2" y="14" width="8" height="6" rx="2" fill="#1D9E75" opacity="0.8"/></svg>`,
   };
 
+  function buildUrl(boardId) {
+    return `${CALENDAR_FILE}?boardId=${encodeURIComponent(boardId)}`;
+  }
+
   function load() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     catch { return []; }
   }
 
-  function save(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+  function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
+  // ── Render cards ──────────────────────────────────────────────────────────
   function renderCards() {
     const data = load();
     const grid = document.getElementById('cardsGrid');
     grid.innerHTML = '';
 
     data.forEach((item, idx) => {
+      const url  = item.boardId ? buildUrl(item.boardId) : item.url;
       const card = document.createElement('a');
       card.className = 'cal-card';
-      card.href = item.url;
+      card.href = url;
 
       card.innerHTML = `
         <div class="icon ${item.color}">${ICONS[item.color] || ICONS.blue}</div>
         <div class="card-body">
           <div class="card-name">${item.name}</div>
-          <div class="card-desc">${item.desc || 'Trello Calendar View'}</div>
+          <div class="card-desc">${item.desc || 'Trello Board Calendar'}</div>
+          ${item.boardId ? `<div class="card-meta">Board: ${item.boardId}</div>` : ''}
         </div>
         <div class="card-arrow">&#8594;</div>
         <button class="delete-btn" title="Remove" data-idx="${idx}">&#10005;</button>
       `;
 
       card.querySelector('.delete-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const arr = load();
-        arr.splice(idx, 1);
-        save(arr);
-        renderCards();
+        e.preventDefault(); e.stopPropagation();
+        const arr = load(); arr.splice(idx, 1); save(arr); renderCards();
       });
 
       grid.appendChild(card);
     });
 
-    /* Add button */
     const addBtn = document.createElement('div');
     addBtn.className = 'add-card';
     addBtn.innerHTML = `<span style="font-size:18px;line-height:1">+</span> Add Calendar`;
-    addBtn.addEventListener('click', () => openModal());
+    addBtn.addEventListener('click', openModal);
     grid.appendChild(addBtn);
   }
 
-  /* ── Modal ── */
+  // ── Modal ─────────────────────────────────────────────────────────────────
   function openModal() {
-    document.getElementById('inputName').value = '';
-    document.getElementById('inputUrl').value = '';
-    document.getElementById('inputDesc').value = '';
+    ['inputName','inputBoardId','inputDesc'].forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).classList.remove('err');
+    });
     document.getElementById('inputColor').value = 'blue';
+    document.getElementById('urlPreview').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('open');
     document.getElementById('inputName').focus();
   }
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
   document.getElementById('cancelBtn').addEventListener('click', closeModal);
-
   document.getElementById('modalOverlay').addEventListener('click', (e) => {
     if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    const name  = document.getElementById('inputName').value.trim();
-    const url   = document.getElementById('inputUrl').value.trim();
-    const desc  = document.getElementById('inputDesc').value.trim();
-    const color = document.getElementById('inputColor').value;
-
-    if (!name || !url) {
-      document.getElementById('inputName').style.borderColor = !name ? '#E24B4A' : '';
-      document.getElementById('inputUrl').style.borderColor  = !url  ? '#E24B4A' : '';
-      return;
+  // Live URL preview as user types board ID
+  document.getElementById('inputBoardId').addEventListener('input', () => {
+    const id  = document.getElementById('inputBoardId').value.trim();
+    const pre = document.getElementById('urlPreview');
+    if (id) {
+      pre.style.display = 'block';
+      pre.innerHTML = `Will open: <span>${buildUrl(id)}</span>`;
+    } else {
+      pre.style.display = 'none';
     }
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const name    = document.getElementById('inputName').value.trim();
+    const boardId = document.getElementById('inputBoardId').value.trim();
+    const desc    = document.getElementById('inputDesc').value.trim();
+    const color   = document.getElementById('inputColor').value;
+
+    let valid = true;
+    if (!name)    { document.getElementById('inputName').classList.add('err');    valid = false; }
+    else            document.getElementById('inputName').classList.remove('err');
+    if (!boardId) { document.getElementById('inputBoardId').classList.add('err'); valid = false; }
+    else            document.getElementById('inputBoardId').classList.remove('err');
+    if (!valid) return;
 
     const arr = load();
-    arr.push({ name, url, desc, color });
+    arr.push({ name, boardId, desc, color });
     save(arr);
     closeModal();
     renderCards();
   });
 
-  /* ── Pre-seed "Enthus M01" ── */
+  // ── Seed: migrate old entry or add default ────────────────────────────────
   (function seed() {
     const existing = load();
-    const alreadyHas = existing.some(c => c.name === 'Enthus M01');
-    if (!alreadyHas) {
-      existing.unshift({
+    if (!existing.length) {
+      existing.push({
         name: 'Enthus M01',
-        url: 'EnthuseM01.html',
+        boardId: '695c638857e213eb5b8b251b',
         desc: 'Trello Board Calendar',
         color: 'blue'
       });
