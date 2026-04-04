@@ -186,18 +186,21 @@
     .day-cell.is-today .day-num { background: var(--today-bg); color: var(--today-text); }
     .day-cell.is-weekend .day-num { color: var(--text-muted); }
 
-    .card-chip {
+    /* Card chip as anchor */
+    a.card-chip {
+      display: block;
       background: var(--chip-normal-bg);
       border-radius: 6px;
       padding: 5px 8px;
-      cursor: default;
       overflow: hidden;
-      transition: filter 0.15s;
+      text-decoration: none;
+      transition: filter 0.15s, opacity 0.15s;
+      cursor: pointer;
     }
 
-    .card-chip:hover { filter: brightness(0.93); }
-    .card-chip.overdue  { background: var(--chip-overdue-bg); }
-    .card-chip.due-soon { background: var(--chip-soon-bg); }
+    a.card-chip:hover { filter: brightness(0.90); }
+    a.card-chip.overdue  { background: var(--chip-overdue-bg); }
+    a.card-chip.due-soon { background: var(--chip-soon-bg); }
 
     .card-name {
       font-size: 11px;
@@ -209,8 +212,8 @@
       text-overflow: ellipsis;
     }
 
-    .card-chip.overdue  .card-name { color: var(--chip-overdue-name); }
-    .card-chip.due-soon .card-name { color: var(--chip-soon-name); }
+    a.card-chip.overdue  .card-name { color: var(--chip-overdue-name); }
+    a.card-chip.due-soon .card-name { color: var(--chip-soon-name); }
 
     .card-meta {
       font-size: 10px;
@@ -218,8 +221,8 @@
       margin-top: 2px;
     }
 
-    .card-chip.overdue  .card-meta { color: var(--chip-overdue-meta); }
-    .card-chip.due-soon .card-meta { color: var(--chip-soon-meta); }
+    a.card-chip.overdue  .card-meta { color: var(--chip-overdue-meta); }
+    a.card-chip.due-soon .card-meta { color: var(--chip-soon-meta); }
 
     .more-badge { font-size: 10px; color: var(--text-muted); padding: 2px 4px; }
 
@@ -325,7 +328,7 @@
         let status = 'normal';
         if (diff < 0) status = 'overdue';
         else if (diff <= 2) status = 'due-soon';
-        return { id: c.id, name: c.name, date: d, status };
+        return { id: c.id, name: c.name, date: d, status, url: c.url };
       });
       loaded = true;
       document.getElementById('statusBar').style.display = 'none';
@@ -384,14 +387,21 @@
           c.date.getDate() === d && c.date.getMonth() === month && c.date.getFullYear() === year
         );
         dayCards.slice(0, MAX_VISIBLE).forEach(card => {
-          const chip = document.createElement('div');
+          const chip = document.createElement('a');
           chip.className = 'card-chip' + (card.status !== 'normal' ? ' ' + card.status : '');
+          chip.href = card.url;
+          chip.target = '_blank';
+          chip.rel = 'noopener noreferrer';
+          chip.title = card.name;
+
           const nameEl = document.createElement('div');
           nameEl.className = 'card-name';
           nameEl.textContent = card.name;
+
           const metaEl = document.createElement('div');
           metaEl.className = 'card-meta';
           metaEl.textContent = DAYS[card.date.getDay()];
+
           chip.appendChild(nameEl);
           chip.appendChild(metaEl);
           cell.appendChild(chip);
