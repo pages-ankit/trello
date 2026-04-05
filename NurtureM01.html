@@ -126,7 +126,17 @@
       position: relative;
     }
     .day-cell:nth-child(7n) { border-right: none; }
-    .day-cell.empty { background: var(--bg); opacity: 0.6; pointer-events: none; }
+    /* Remove bottom border from the last row of cells */
+    .day-cell.last-row { border-bottom: none; }
+    .day-cell.empty {
+      background: var(--bg); opacity: 0.5;
+    }
+    .day-cell.empty.drag-over, .day-cell.overflow.drag-over {
+      opacity: 1;
+    }
+    .day-cell.overflow {
+      background: var(--bg); opacity: 0.5;
+    }
     .day-cell.drag-over {
       background: var(--drop-highlight);
       box-shadow: inset 0 0 0 2px var(--drop-border);
@@ -139,6 +149,7 @@
     }
     .day-cell.is-today .day-num { background: var(--today-bg); color: var(--today-text); }
     .day-cell.is-weekend .day-num { color: var(--text-muted); }
+    .day-cell.overflow .day-num { color: var(--text-muted); }
 
     a.card-chip {
       display: block; background: var(--chip-normal-bg); border-radius: 6px;
@@ -163,7 +174,6 @@
     a.card-chip.overdue  .card-meta { color: var(--chip-overdue-meta); }
     a.card-chip.due-soon .card-meta { color: var(--chip-soon-meta); }
 
-    /* Subtle grip dots */
     .card-grip {
       position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
       display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
@@ -177,7 +187,6 @@
 
     .more-badge { font-size: 10px; color: var(--text-muted); padding: 2px 4px; }
 
-    /* Floating ghost */
     #drag-ghost {
       position: fixed; pointer-events: none; z-index: 9999;
       background: var(--chip-normal-bg); border-radius: 6px;
@@ -190,7 +199,6 @@
     #drag-ghost.overdue  { background: var(--chip-overdue-bg); color: var(--chip-overdue-name); }
     #drag-ghost.due-soon { background: var(--chip-soon-bg);    color: var(--chip-soon-name); }
 
-    /* Toast */
     #toast {
       position: fixed; bottom: 28px; left: 50%;
       transform: translateX(-50%) translateY(16px);
@@ -273,7 +281,6 @@
 
   let nav = 0, allCards = [], loaded = false;
 
-  // Drag state
   let dragCardId   = null;
   let lastDropCell = null;
   let touchDragActive = false;
@@ -282,7 +289,6 @@
   const toastEl  = document.getElementById('toast');
   let toastTimer;
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   function computeStatus(date) {
     const diff = Math.ceil((date - new Date()) / 86400000);
     if (diff < 0)  return 'overdue';
@@ -317,7 +323,6 @@
     if (cell) { cell.classList.add('drag-over'); lastDropCell = cell; }
   }
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
   async function fetchCards() {
     try {
       const res  = await fetch(`https://api.trello.com/1/boards/${BOARD_ID}/cards?key=${API_KEY}&token=${API_TOKEN}`);
@@ -336,7 +341,6 @@
     }
   }
 
-  // ── Update due date via API ────────────────────────────────────────────────
   async function updateDueDate(cardId, newDate) {
     const res = await fetch(
       `https://api.trello.com/1/cards/${cardId}?key=${API_KEY}&token=${API_TOKEN}`,
@@ -346,7 +350,6 @@
     if (!res.ok) throw new Error('HTTP ' + res.status);
   }
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
   function renderStats() {
     const overdue = allCards.filter(c => c.status === 'overdue').length;
     const dueSoon = allCards.filter(c => c.status === 'due-soon').length;
@@ -359,7 +362,6 @@
     `;
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   function render() {
     const now   = new Date();
     const base  = new Date(now.getFullYear(), now.getMonth() + nav, 1);
@@ -372,12 +374,51 @@
     const grid = document.getElementById('daysGrid');
     grid.innerHTML = '';
 
+    // Total cells used so far = firstDay (leading empties) + daysInMonth
+    const totalCells = firstDay + daysInMonth;
+    // Round up to next multiple of 7 to find how many trailing overflow days we need
+    const rows = Math.ceil(totalCells / 7);
+    const totalSlots = rows * 7;
+    const trailingCount = totalSlots - totalCells;
+
+    // Leading empty cells (days from previous month shown as dimmed)
+    const prevMonthDays = new Date(year, month, 0).getDate(); // last day of previous month
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear  = month === 0 ? year - 1 : year;
     for (let i = 0; i < firstDay; i++) {
+      const dayNum = prevMonthDays - firstDay + i + 1;
       const el = document.createElement('div');
       el.className = 'day-cell empty';
+      el.dataset.day   = dayNum;
+      el.dataset.month = prevMonth;
+      el.dataset.year  = prevYear;
+
+      el.addEventListener('dragover',  onDragOver);
+      el.addEventListener('dragleave', onDragLeave);
+      el.addEventListener('drop',      onDrop);
+
+      const numEl = document.createElement('div');
+      numEl.className = 'day-num';
+      numEl.textContent = dayNum;
+      el.appendChild(numEl);
+
+      if (loaded) {
+        const dayCards = allCards.filter(c =>
+          c.date.getDate() === dayNum && c.date.getMonth() === prevMonth && c.date.getFullYear() === prevYear
+        );
+        dayCards.slice(0, MAX_VISIBLE).forEach(card => el.appendChild(buildChip(card)));
+        const hidden = dayCards.length - MAX_VISIBLE;
+        if (hidden > 0) {
+          const more = document.createElement('div');
+          more.className = 'more-badge'; more.textContent = `+${hidden} more`;
+          el.appendChild(more);
+        }
+      }
+
       grid.appendChild(el);
     }
 
+    // Current month days
     for (let d = 1; d <= daysInMonth; d++) {
       const cell = document.createElement('div');
       cell.className = 'day-cell';
@@ -388,7 +429,10 @@
         cell.classList.add('is-today');
       if (dow === 0 || dow === 6) cell.classList.add('is-weekend');
 
-      // Drop targets
+      // Mark last row cells so we can remove their bottom border
+      const cellIndex = firstDay + d - 1; // 0-based position
+      if (cellIndex >= (rows - 1) * 7) cell.classList.add('last-row');
+
       cell.addEventListener('dragover',  onDragOver);
       cell.addEventListener('dragleave', onDragLeave);
       cell.addEventListener('drop',      onDrop);
@@ -412,9 +456,43 @@
       }
       grid.appendChild(cell);
     }
+
+    // Trailing overflow cells — next month's days, droppable
+    const nextMonth = (month + 1) % 12;
+    const nextYear  = month === 11 ? year + 1 : year;
+    for (let d = 1; d <= trailingCount; d++) {
+      const el = document.createElement('div');
+      el.className = 'day-cell overflow last-row';
+      el.dataset.day   = d;
+      el.dataset.month = nextMonth;
+      el.dataset.year  = nextYear;
+
+      el.addEventListener('dragover',  onDragOver);
+      el.addEventListener('dragleave', onDragLeave);
+      el.addEventListener('drop',      onDrop);
+
+      const numEl = document.createElement('div');
+      numEl.className = 'day-num';
+      numEl.textContent = d;
+      el.appendChild(numEl);
+
+      if (loaded) {
+        const dayCards = allCards.filter(c =>
+          c.date.getDate() === d && c.date.getMonth() === nextMonth && c.date.getFullYear() === nextYear
+        );
+        dayCards.slice(0, MAX_VISIBLE).forEach(card => el.appendChild(buildChip(card)));
+        const hidden = dayCards.length - MAX_VISIBLE;
+        if (hidden > 0) {
+          const more = document.createElement('div');
+          more.className = 'more-badge'; more.textContent = `+${hidden} more`;
+          el.appendChild(more);
+        }
+      }
+
+      grid.appendChild(el);
+    }
   }
 
-  // ── Build chip ─────────────────────────────────────────────────────────────
   function buildChip(card) {
     const chip = document.createElement('a');
     chip.className  = 'card-chip' + (card.status !== 'normal' ? ' ' + card.status : '');
@@ -431,19 +509,16 @@
     const metaEl = document.createElement('div');
     metaEl.className = 'card-meta'; metaEl.textContent = DAYS[card.date.getDay()];
 
-    // Grip dots (2×3 grid)
     const grip = document.createElement('div');
     grip.className = 'card-grip';
     for (let i = 0; i < 6; i++) grip.appendChild(document.createElement('i'));
 
     chip.appendChild(nameEl); chip.appendChild(metaEl); chip.appendChild(grip);
 
-    // ── Desktop drag ────────────────────────────────────────────────────────
     chip.addEventListener('dragstart', (e) => {
       dragCardId = card.id;
       chip.classList.add('dragging');
       showGhost(e.clientX, e.clientY, card);
-      // Transparent drag image
       const px = document.createElement('canvas'); px.width = px.height = 1;
       e.dataTransfer.setDragImage(px, 0, 0);
       e.dataTransfer.effectAllowed = 'move';
@@ -458,12 +533,10 @@
       hideGhost(); clearDropCell(); dragCardId = null;
     });
 
-    // ── Touch drag ──────────────────────────────────────────────────────────
     let touchMoved = false;
 
     chip.addEventListener('touchstart', (e) => {
       touchMoved = false;
-      // Small delay to distinguish tap (open link) from drag
       chip._touchTimer = setTimeout(() => {
         touchDragActive = true;
         dragCardId = card.id;
@@ -480,20 +553,20 @@
       const t = e.touches[0];
       showGhost(t.clientX, t.clientY, card);
       const el   = document.elementFromPoint(t.clientX, t.clientY);
-      const cell = el ? el.closest('.day-cell:not(.empty)') : null;
+      const cell = el ? el.closest('.day-cell') : null;
       highlightCell(cell);
     }, { passive: false });
 
     chip.addEventListener('touchend', (e) => {
       clearTimeout(chip._touchTimer);
-      if (!touchDragActive) return; // was just a tap — let href open
+      if (!touchDragActive) return;
 
       e.preventDefault();
       chip.classList.remove('dragging');
       hideGhost();
       const t    = e.changedTouches[0];
       const el   = document.elementFromPoint(t.clientX, t.clientY);
-      const cell = el ? el.closest('.day-cell:not(.empty)') : null;
+      const cell = el ? el.closest('.day-cell') : null;
       clearDropCell();
       if (cell) dropOnCell(cell);
       touchDragActive = false; dragCardId = null;
@@ -509,7 +582,6 @@
     return chip;
   }
 
-  // ── Desktop drop handlers ──────────────────────────────────────────────────
   function onDragOver(e) {
     if (!dragCardId) return;
     e.preventDefault();
@@ -530,7 +602,6 @@
     dropOnCell(cell);
   }
 
-  // ── Core: apply reschedule ─────────────────────────────────────────────────
   async function dropOnCell(cell) {
     if (!dragCardId) return;
     const card = allCards.find(c => c.id === dragCardId);
@@ -540,15 +611,13 @@
     const newMonth = parseInt(cell.dataset.month, 10);
     const newYear  = parseInt(cell.dataset.year,  10);
 
-    // Keep original time-of-day
     const newDate = new Date(newYear, newMonth, newDay,
       card.date.getHours(), card.date.getMinutes(), card.date.getSeconds());
 
-    if (newDate.toDateString() === card.date.toDateString()) return; // no-op
+    if (newDate.toDateString() === card.date.toDateString()) return;
 
     const prevDate = card.date;
 
-    // Optimistic update
     card.date   = newDate;
     card.status = computeStatus(newDate);
     renderStats(); render();
@@ -558,7 +627,6 @@
       await updateDueDate(card.id, newDate);
       showToast(`✓ "${card.name}" moved to ${newDate.toLocaleDateString()}`);
     } catch(err) {
-      // Rollback
       card.date   = prevDate;
       card.status = computeStatus(prevDate);
       renderStats(); render();
@@ -566,7 +634,6 @@
     }
   }
 
-  // ── Nav ────────────────────────────────────────────────────────────────────
   document.getElementById('prevBtn').addEventListener('click',  () => { nav--; render(); });
   document.getElementById('nextBtn').addEventListener('click',  () => { nav++; render(); });
   document.getElementById('todayBtn').addEventListener('click', () => { nav = 0; render(); });
